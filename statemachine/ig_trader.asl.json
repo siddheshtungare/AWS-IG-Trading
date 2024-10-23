@@ -1,0 +1,125 @@
+{
+  "Comment": "A state machine for IG trading.",
+  "StartAt": "Ig-Login",
+  "States": {
+    "Ig-Login": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:985148696141:function:IG-Trading-1-IgLoginFunction-IlrAmfllbRIo",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 15,
+          "MaxAttempts": 5,
+          "BackoffRate": 1.5
+        }
+      ],
+      "Next": "Errors-after-Ig-Login"
+    },
+    "Errors-after-Ig-Login": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.IGLoginStep.errors_exist",
+          "BooleanEquals": true,
+          "Next": "Pass"
+        }
+      ],
+      "Default": "Config-File"
+    },
+    "Pass": {
+      "Type": "Pass",
+      "End": true
+    },
+    "Config-File": {
+      "Type": "Map",
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "Run-Ig-Strategy",
+        "States": {
+          "Run-Ig-Strategy": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "OutputPath": "$.Payload",
+            "Parameters": {
+              "Payload.$": "$",
+              "FunctionName": "arn:aws:lambda:us-east-1:985148696141:function:IG-Trading-1-IgRunStrategyFunction-0YMdFjqU6vBb:$LATEST"
+            },
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException",
+                  "Lambda.SdkClientException",
+                  "Lambda.TooManyRequestsException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2
+              }
+            ],
+            "Next": "Errors-after-Ig-Run-Strategy"
+          },
+          "Errors-after-Ig-Run-Strategy": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Variable": "$.errors_exist",
+                "BooleanEquals": true,
+                "Next": "Pass (1)"
+              }
+            ],
+            "Default": "Market-closed"
+          },
+          "Market-closed": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Variable": "$.market_closed",
+                "BooleanEquals": true,
+                "Next": "Pass (2)"
+              }
+            ],
+            "Default": "Ig-Process-Buy-or-Sell"
+          },
+          "Pass (2)": {
+            "Type": "Pass",
+            "End": true
+          },
+          "Pass (1)": {
+            "Type": "Pass",
+            "End": true
+          },
+          "Ig-Process-Buy-or-Sell": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "Payload.$": "$",
+              "FunctionName": "arn:aws:lambda:us-east-1:985148696141:function:IG-Trading-1-IgProcessBuySellFunction-QGe0VIAJcqXn:$LATEST"
+            },
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException",
+                  "Lambda.SdkClientException",
+                  "Lambda.TooManyRequestsException",
+                  "States.TaskFailed"
+                ],
+                "MaxAttempts": 3,
+                "BackoffRate": 2,
+                "IntervalSeconds": 60
+              }
+            ],
+            "End": true,
+            "OutputPath": "$.Payload"
+          }
+        }
+      },
+      "ResultPath": "$.ConfigStep",
+      "ItemsPath": "$.IGLoginStep.config_items",
+      "End": true
+    }
+  }
+}

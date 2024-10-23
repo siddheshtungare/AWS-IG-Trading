@@ -1,0 +1,26 @@
+{
+    "request_headers": {},
+    "account_balance": {},
+    "config": {
+        "name": "ASX",
+        "MarketId": "IX.D.ASX.IFT.IP"
+    },
+    "testing_params": {
+        "history-date-last": {
+            "year": 2024,
+            "month": 1,
+            "day": 27,
+            "hour": 8,
+            "min": 0,
+            "sec": 0
+        },
+        "sy-datum": {
+            "year": 2024,
+            "month": 1,
+            "day": 28,
+            "hour": 8,
+            "min": 0,
+            "sec": 0
+        }
+    }
+}

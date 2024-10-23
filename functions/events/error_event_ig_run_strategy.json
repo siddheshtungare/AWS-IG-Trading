@@ -1,0 +1,14 @@
+{
+    "request_headers": {
+        "Content-Type": "application/json",
+        "X-IG-API-KEY": "8e09d954c97f463c3a02d9991d95115ab1e2f01a",
+        "CST": "933cff635594f04297750a23b5a03ceab5b12659fd7d644a437033cda7099bCC01113",
+        "X-SECURITY-TOKEN": "a0f8e7dfbbd1d38cd2b4674d257d16f503ccf36da181ef34dfe39858b79ea8CD01113"
+    },
+    "account_balance": {},
+    "config": {
+        "name": "ASX",
+        "MarketId": "IX.D.ASX.IFT.IP",
+        "prominence": 2
+    }
+}

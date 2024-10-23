@@ -1,0 +1,18 @@
+{
+    "symbol": "FTSE",
+    "config": {
+        "name": "FTSE",
+        "MarketId": "IX.D.FTSE.IFA.IP",
+        "prominence": 2
+    },
+    "signal": -1,
+    "trade_params": {
+        "tp": 7516.23,
+        "sl": 7608.900000000001,
+        "price_points": [
+            7574.6,
+            7599.6,
+            7550.2
+        ]
+    }
+}
