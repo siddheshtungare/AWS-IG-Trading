@@ -1,4 +1,0 @@
-requests
-pandas
-boto3
-pytz
