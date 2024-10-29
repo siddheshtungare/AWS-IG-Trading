@@ -8,14 +8,14 @@ This project is built using the AWS Serverless Application Model (SAM) and is de
 
 ### AWS Lambda Functions
 
-- **IgLoginFunction**
+- **[[IgLoginFunction]]**
 
   - **Purpose**: Handles the login process to the IG trading platform.
   - **Logic**:
     - Connects to the IG trading platform using provided credentials.
     - Retrieves and stores session tokens for subsequent API calls.
 
-- **IgRunStrategyFunction**
+- **[[IgRunStrategyFunction]]**
 
   - **Purpose**: Executes trading strategies based on market data.
   - **Logic**:
@@ -30,7 +30,7 @@ This project is built using the AWS Serverless Application Model (SAM) and is de
     - **Output**:
       - Returns trading signals along with calculated TP and SL levels, and price points for further processing.
 
-- **IgProcessBuySellFunction**
+- **[[IgProcessBuySellFunction]]**
 
   - **Purpose**: Processes buy and sell orders based on trading signals.
   - **Logic**:
@@ -38,26 +38,15 @@ This project is built using the AWS Serverless Application Model (SAM) and is de
     - Executes buy/sell orders on the IG trading platform.
     - Records transaction details in the `TransactionTable` and `EquityTable` DynamoDB tables.
 
-- **StockSellerFunction**
-
-  - **Purpose**: Handles the selling of stocks.
-  - **Logic**:
-    - Receives sell signals.
-    - Executes sell orders on the trading platform.
-    - Updates transaction records.
-
-- **StockBuyerFunction**
-  - **Purpose**: Handles the buying of stocks.
-  - **Logic**:
-    - Receives buy signals.
-    - Executes buy orders on the trading platform.
-    - Updates transaction records.
-
 ### Other AWS Services
 
 - **AWS Step Functions**: Orchestrates the execution of the Lambda functions in a defined sequence.
 - **DynamoDB**: Stores transaction and equity data.
 - **S3**: Provides full access for storing and retrieving data related to the trading process.
+
+### State Machine Workflow
+
+The state machine, as detailed in the [[StateMachineWorkflow]], is a crucial component of this project. It automates the trading process by coordinating the execution of various Lambda functions. The workflow begins with the `Ig-Login` state, which handles authentication with the IG platform. It then proceeds to execute trading strategies and process buy/sell orders based on the signals generated. The state machine includes robust error handling and retry mechanisms to ensure reliability and resilience in trading operations. Each state in the workflow is designed to handle specific tasks, such as checking for errors, processing configuration files, and executing trades, ensuring a seamless and automated trading experience.
 
 ## Prerequisites
 
@@ -105,16 +94,3 @@ This project is built using the AWS Serverless Application Model (SAM) and is de
 ## Monitoring and Logging
 
 - **CloudWatch Logs**: Access logs for each Lambda function to monitor execution and troubleshoot issues.
-- **X-Ray**: [If applicable, describe tracing setup]
-
-## Troubleshooting
-
-- [List common issues and solutions]
-
-## Contributing
-
-- [Describe how others can contribute to the project]
-
-## License
-
-- [Specify the license under which the project is distributed]

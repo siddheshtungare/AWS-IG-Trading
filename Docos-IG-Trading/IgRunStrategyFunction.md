@@ -18,9 +18,8 @@ The `IgRunStrategyFunction` is designed to execute trading strategies based on m
 ### Signal Generation
 
 1. **Evaluate Buy Conditions**:
-
    - **Retracement Confirmation**: Confirms that the retracement forms a trough by checking the sequence of peaks and troughs.
-   - **Retracement Level Check**: Ensures the retracement is within specified Fibonacci levels, adjusted by a configurable zone thickness.
+   - **Retracement Level Check**: Ensures the retracement is within specified Fibonacci levels, controlled through the [[Configuration File - config.json|configuration file]], adjusted by a configurable zone thickness.
    - **Price Level Validation**: Validates that the current price is between the stop-loss (SL) and the previous peak to avoid API failures.
 
 2. **Evaluate Sell Conditions**:

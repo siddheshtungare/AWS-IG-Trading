@@ -243,4 +243,8 @@ $RECYCLE.BIN/
 
 template.yaml
 
+/Docos-IG-Trading/
+
+README-old.md
+
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
