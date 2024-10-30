@@ -1,0 +1,11 @@
+{
+    "config": {
+        "name": "ASX",
+        "MarketId": "IX.D.ASX.IFT.IP",
+        "prominence": 2,
+        "fibo_level_from": 0.3,
+        "fibo_level_to": 0.5,
+        "tp_level": 1.5,
+        "max_drawdown_multiplier": 0.02
+    }
+}

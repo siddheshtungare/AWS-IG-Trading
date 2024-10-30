@@ -1,0 +1,11 @@
+{
+    "config": {
+        "name": "ASX",
+        "MarketId": "IX.D.ASX.IFT.IP",
+        "strategy": "sma-cross",
+        "strategy_params": {
+            "sma_fast": 20,
+            "sma_slow": 200
+        }
+    }
+}

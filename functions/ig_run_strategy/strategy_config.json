@@ -1,0 +1,37 @@
+{
+    "strategies": {
+        "fibo": {
+            "module": "fibo_strategy",
+            "function": "strategy",
+            "params": {
+                "prominence": 2,
+                "fibo_level_from": 0.3,
+                "fibo_level_to": 0.5,
+                "tp_level": 1.5,
+                "max_drawdown_multiplier": 0.02,
+                "zone_thickness": 0.025
+            }
+        },
+        "fibo2": {
+            "module": "fibo_strategy_2",
+            "function": "strategy",
+            "params": {
+                "prominence": 2,
+                "fibo_level_from": 0.3,
+                "fibo_level_to": 0.5,
+                "tp_level": 1.5,
+                "max_drawdown_multiplier": 0.02,
+                "zone_thickness": 0.025
+            }
+        },
+        "sma-cross": {
+            "module": "sma_strategy",
+            "function": "strategy",
+            "params": {
+                "sma_fast": 50,
+                "sma_slow": 200,
+                "max_drawdown_multiplier": 0.02
+            }
+        }
+    }
+}

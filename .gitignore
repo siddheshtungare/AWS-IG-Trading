@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
 ### Linux ###
@@ -243,8 +242,13 @@ $RECYCLE.BIN/
 
 template.yaml
 
-Docos-IG-Trading/
+/Docos-IG-Trading/
 
 README-old.md
+
+**/aws-sam/
+
+# Ignore all instructions.md files in any directory
+**/instructions.md
 
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode

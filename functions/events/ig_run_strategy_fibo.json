@@ -1,0 +1,7 @@
+{
+    "config": {
+        "name": "ASX",
+        "MarketId": "IX.D.ASX.IFT.IP",
+        "strategy": "fibo"
+    }
+}
