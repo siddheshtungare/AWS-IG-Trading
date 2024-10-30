@@ -1,5 +1,7 @@
 requests
 pandas
-boto3
-botocore
+numpy
 scipy
+pytz
+boto3
+PyYAML

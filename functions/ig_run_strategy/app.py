@@ -41,6 +41,7 @@ def lambda_handler(event, context):
     Returns:
         dict: Result containing signal, parameters, and status messages
     """
+    logs = []
     try:
         # Validate input event
         if not event or 'config' not in event:
@@ -65,29 +66,36 @@ def lambda_handler(event, context):
         strategy_name = config.get('strategy', 'fibo')
         bucket = 'aws-sam-cli-managed-default-samclisourcebucket-3pncdm36uy1a'
 
-        print(f"\n{'='*50}")
-        print(f"Starting strategy execution for {symbol_name}")
-        print(f"Strategy: {strategy_name}")
-        print(f"{'='*50}\n")
+        logs.append(f"\n{'='*50}")
+        logs.append(f"Starting strategy execution for {symbol_name}")
+        logs.append(f"Strategy: {strategy_name}")
+        logs.append(f"{'='*50}\n")
 
         try:
             # Load strategy
-            strategy_func, strategy_params = load_strategy(strategy_name)
+            strategy_func, strategy_params, strategy_loader_logs = load_strategy(strategy_name)
+            logs.extend(strategy_loader_logs)
             # Merge strategy params with any overrides from event
             strategy_params.update(config.get('strategy_params', {}))
         except Exception as e:
-            print(f"Strategy loading error: {str(e)}")
-            print(f"Traceback: {traceback.format_exc()}")
+            logs.append(f"Strategy loading error: {str(e)}")
+            logs.append(f"Traceback: {traceback.format_exc()}")
             raise ValueError(f"Failed to load strategy: {str(e)}")
 
         # Get historical and current data
-        df_prices_hist = get_historical_data(symbol_name, bucket)
-        
-        login()
-        df_prices_new = get_price_data(symbol_market_id, num_points=2)
-        
+        df_prices_hist, hist_logs = get_historical_data(symbol_name, bucket)
+        logs.extend(hist_logs)
+
+        # Login to IG API
+        request_header, response_body, login_logs = login()
+        logs.extend(login_logs)
+
+        df_prices_new, new_logs = get_price_data(symbol_market_id, num_points=2)
+        logs.extend(new_logs)
+
         # Check market status
-        df_prices_new, market_closed, error_message = check_market_status(df_prices_new)
+        df_prices_new, market_closed, error_message, status_logs = check_market_status(df_prices_new)
+        logs.extend(status_logs)
         if market_closed:
             gv_market_closed = True
             gv_bapiret_tab.append({
@@ -98,16 +106,21 @@ def lambda_handler(event, context):
             })
         
         # Merge and update data
-        df_prices = merge_price_data(df_prices_hist, df_prices_new)
-        update_s3_data(df_prices, bucket, symbol_name)
+        df_prices, merge_logs = merge_price_data(df_prices_hist, df_prices_new)
+        logs.extend(merge_logs)
+
+        update_logs = update_s3_data(df_prices, bucket, symbol_name)
+        logs.extend(update_logs)
 
         if not gv_market_closed:
             # Prepare data for strategy
-            df_strategy = prepare_strategy_data(df_prices, num_records=500)
-            
+            df_strategy, prep_logs = prepare_strategy_data(df_prices, num_records=500)
+            logs.extend(prep_logs)
+
             # Apply strategy
             strategy_input = {**event, **strategy_params}
-            signal, params = strategy_func(df_strategy, strategy_input)
+            signal, params, strategy_logs = strategy_func(df_strategy, strategy_input)
+            logs.extend(strategy_logs)
 
             # Log strategy outcome
             if signal == 1:
@@ -139,12 +152,13 @@ def lambda_handler(event, context):
             'trade_params': params,
             'market_closed': gv_market_closed,
             'errors_exist': gv_errors_exist,
-            'messages': gv_bapiret_tab
+            'messages': gv_bapiret_tab,
+            'logs': logs
         }
 
     except Exception as e:
-        print(f"Critical error: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
+        logs.append(f"Critical error: {str(e)}")
+        logs.append(f"Traceback: {traceback.format_exc()}")
         
         return {
             'statusCode': 500,
@@ -155,7 +169,8 @@ def lambda_handler(event, context):
                 "message_source": "IgRunStrategyFunction",
                 "message_at": dt.datetime.now(tz=pytz.timezone('Australia/Sydney')).strftime(format='%Y-%m-%dT%H:%M:%S.%f'),
                 "message": f"Critical error: {str(e)}"
-            }]
+            }],
+            'logs': logs
         }
 
 

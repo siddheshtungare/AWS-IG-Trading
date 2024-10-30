@@ -15,7 +15,7 @@ codeuri = "/Users/siddhesh/Developments/MyProjects/Trading/AWS-IG-Trading/functi
 runtime = "python3.9"
 architecture = "x86_64"
 handler = "app.lambda_handler"
-manifest_hash = "14bf1a09591a011449af216f710b52d9"
+manifest_hash = "1dcb42b418470b4101717a2636129a43"
 packagetype = "Zip"
 functions = ["IgRunStrategyFunction"]
 

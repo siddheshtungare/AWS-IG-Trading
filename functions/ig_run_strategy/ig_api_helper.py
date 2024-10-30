@@ -5,6 +5,7 @@ import datetime as dt
 import pandas as pd 
 import numpy as np 
 from util_funcs import *
+import traceback
 
 request_headers = {'Content-Type': 'application/json','X-IG-API-KEY': os.environ.get("DEMO_API_KEY"), 'Version': '2'}
 account_balance = {}
@@ -34,40 +35,96 @@ def get_account_balance(refresh=False):
 # ====================== API LOGIN ==============================================================
 # To be for logging in
 def login():
-    url = os.environ.get("DEMO_API_URL") + "/session"
+    """
+    Handles IG API login and authentication
+    Returns:
+        tuple: (request_header, response_body, logs)
+    """
+    logs = []
+    try:
+        url = os.environ.get("DEMO_API_URL") + "/session"
+        
+        # Validate environment variables
+        required_env_vars = ["DEMO_API_URL", "DEMO_USERNAME", "DEMO_PASSWORD"]
+        missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
+        if missing_vars:
+            raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
-    payload = json.dumps({
-    "identifier": os.environ.get("DEMO_USERNAME"),
-    "password": os.environ.get("DEMO_PASSWORD"),
-    "encryptedPassword": None
-    })
-    
-    # headers = headers
-    global request_headers
-    global account_balance
+        payload = json.dumps({
+            "identifier": os.environ.get("DEMO_USERNAME"),
+            "password": os.environ.get("DEMO_PASSWORD"),
+            "encryptedPassword": None
+        })
+        
+        global request_headers
+        global account_balance
+        request_headers['Version'] = '2'
+        
+        logs.append("\nAttempting IG API login...")
+        response = requests.request("POST", url, headers=request_headers, data=payload)
+        
+        # Check response status
+        if response.status_code == 200:
+            logs.append(f"Login successful (Status: {response.status_code})")
+            request_header = dict(response.headers)
+            response_body = json.loads(response.text)
+            
+            # Update headers with authentication tokens
+            if 'CST' in request_header and 'X-SECURITY-TOKEN' in request_header:
+                request_headers.update({
+                    "CST": request_header['CST'], 
+                    "X-SECURITY-TOKEN": request_header['X-SECURITY-TOKEN']
+                })
+                logs.append("Authentication tokens updated")
+            else:
+                raise ValueError("Authentication tokens missing from response")
+            
+            # Update account balance
+            try:
+                account_balance = response_body['accountInfo']
+                logs.append("Account balance updated")
+            except KeyError:
+                logs.append("Warning: Could not update account balance - 'accountInfo' not found in response")
+                logs.append(f"Response body: {json.dumps(response_body, indent=2)}")
+            
+            return request_header, response_body, logs
+            
+        elif response.status_code == 401:
+            logs.append(f"Login failed: Authentication error (Status: {response.status_code})")
+            logs.append(f"Response: {response.text}")
+            raise ValueError("Invalid credentials")
+            
+        elif response.status_code == 403:
+            logs.append(f"Login failed: Access forbidden (Status: {response.status_code})")
+            logs.append(f"Response: {response.text}")
+            raise ValueError("Access forbidden - check API permissions")
+            
+        elif response.status_code == 429:
+            logs.append(f"Login failed: Too many requests (Status: {response.status_code})")
+            logs.append(f"Response: {response.text}")
+            raise ValueError("Rate limit exceeded - try again later")
+            
+        else:
+            logs.append(f"Login failed: Unexpected status code {response.status_code}")
+            logs.append(f"Response: {response.text}")
+            raise ValueError(f"Login failed with status code {response.status_code}")
+            
+    except requests.exceptions.RequestException as e:
+        logs.append(f"Network error during login: {str(e)}")
+        logs.append(f"Traceback: {traceback.format_exc()}")
+        raise ValueError(f"Network error during login: {str(e)}")
+        
+    except json.JSONDecodeError as e:
+        logs.append(f"Invalid JSON response: {str(e)}")
+        logs.append(f"Response text: {response.text}")
+        logs.append(f"Traceback: {traceback.format_exc()}")
+        raise ValueError(f"Invalid JSON response from API: {str(e)}")
+        
+    except Exception as e:
+        logs.append(f"Unexpected error during login: {str(e)}")
+        logs.append(f"Traceback: {traceback.format_exc()}")
+        raise
 
-    request_headers['Version'] = '2'
-    
-    response = requests.request("POST", url, headers=request_headers, data=payload)
-    
-    request_header = dict(response.headers)
-
-    response_body = json.loads(response.text)
-
-    print(f"IG-Login API called. Response status code was {response.status_code}")
-
-    try: 
-        account_balance = response_body['accountInfo']
-    except KeyError: 
-        print(f"\nKeyError exception raised in the login API")
-        print(f"\nThe response-header from the login API is {response.headers}")
-        print(f"\nThe response-text from the login API is {response.text}")
-    # print(f"\n{response.text}\n")
-    
-    request_headers.update({"CST": request_header['CST'], "X-SECURITY-TOKEN": request_header['X-SECURITY-TOKEN']})
-    
-    return request_header, json.loads(response.text)
-    
 # ====================== API ACCOUNT INFO ==============================================================
 # API for calling account info 
 def get_account_info():

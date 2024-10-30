@@ -14,7 +14,10 @@ def strategy(df_data, params):
     Returns:
         signal: 1 for buy, -1 for sell, 0 for no trade
         params: Dictionary with trade parameters (TP, SL, etc.)
+        logs: List of strategy execution logs
     """
+    logs = []  # Initialize logs list
+    
     # Extract strategy parameters
     prominence = params.get("prominence", 2)
     fibo_level_from = params.get("fibo_level_from",0.3)
@@ -23,13 +26,13 @@ def strategy(df_data, params):
     max_drawdown_multiplier = params.get('max_drawdown_multiplier', 0.02)
     zone_thickness = 0.025
 
-    print("\nStarting Fibonacci strategy analysis...")
-    print(f"Parameters: prominence={prominence}, fibo_levels={fibo_level_from}-{fibo_level_to}")
-    print(f"          : tp_level={tp_level}, max_drawdown_multiplier={max_drawdown_multiplier}, zone_thickness={zone_thickness}")
+    logs.append("\nStarting Fibonacci strategy analysis...")
+    logs.append(f"Parameters: prominence={prominence}, fibo_levels={fibo_level_from}-{fibo_level_to}")
+    logs.append(f"          : tp_level={tp_level}, max_drawdown_multiplier={max_drawdown_multiplier}, zone_thickness={zone_thickness}")
 
     # Only need the last 40 rows
     df_data = df_data.iloc[-40:, :].copy()
-    print(f"Analyzing last {len(df_data)} candles")
+    logs.append(f"Analyzing last {len(df_data)} candles")
 
     # Get peaks and troughs
     df_peaks_troughs = get_peaks_and_troughs(df_data, prominence)
@@ -37,8 +40,8 @@ def strategy(df_data, params):
 
     # Current row
     row = df.iloc[-1, :]
-    print("\nCurrent market state:")
-    print(f"Last close: {row['Close']}")
+    logs.append("\nCurrent market state:")
+    logs.append(f"Last close: {row['Close']}")
 
     # Details of the last peak/trough 
     entry_peak_or_trough = df_peaks_troughs['Peak_or_trough'][-1]
@@ -55,10 +58,10 @@ def strategy(df_data, params):
     prev_wave_length = df_peaks_troughs['Difference'][-3]
     prev_price_point = df_peaks_troughs['Price_point'][-3]
 
-    print("\nWave Analysis for the final Buy/Sell signals:")
-    print(f"Last point: {entry_peak_or_trough} at {entry_price_point}")
-    print(f"Second last: {peak_or_trough} at {price_point}")
-    print(f"Third last: {prev_peak_or_trough} at {prev_price_point}")
+    logs.append("\nWave Analysis for the final Buy/Sell signals:")
+    logs.append(f"Last point: {entry_peak_or_trough} at {entry_price_point}")
+    logs.append(f"Second last: {peak_or_trough} at {price_point}")
+    logs.append(f"Third last: {prev_peak_or_trough} at {prev_price_point}")
 
     signal = 0
     tp_price = 0
@@ -70,13 +73,13 @@ def strategy(df_data, params):
 
     # 2. The last retracement needs to be within the 0.48 to 0.52 area of the prev retracement - Replaced by config - zone_thickness
         # retracement_value = abs(price_point - row['Low']) 
-        print("\nEvaluating BUY conditions...")
+        logs.append("\nEvaluating BUY conditions...")
 
         retracement_percent = entry_wave_length / wave_length
-        print(f"Retracement: {retracement_percent:.2f}")
+        logs.append(f"Retracement: {retracement_percent:.2f}")
         
         if retracement_percent > (fibo_level_from - zone_thickness) and retracement_percent < (fibo_level_to + zone_thickness): 
-            print("Retracement within Fibonacci zone")
+            logs.append("Retracement within Fibonacci zone")
             
             tp_price = price_point + (tp_level * wave_length) 
             sl_price = prev_price_point - (wave_length * 0.2)
@@ -86,22 +89,22 @@ def strategy(df_data, params):
             # if row['Close'] > sl_price and row['Close'] < tp_price: 
             # Variation - Close needs to be between the SL and the previous peak
             if row['Close'] > sl_price and row['Close'] < price_point: 
-                print("All BUY conditions met")
+                logs.append("All BUY conditions met")
                 df_data.at[df_data.index[-1], 'Signal'] = 1
                 signal = 1
             else:
-                print(f"BUY aborted: Close price not between SL ({sl_price:.2f}) and previous peak ({price_point:.2f})")
+                logs.append(f"BUY aborted: Close price not between SL ({sl_price:.2f}) and previous peak ({price_point:.2f})")
 
     # Evaluate Sell conditions 
     # 1. The retracement as a Peak needs to be confirmed 
     if entry_peak_or_trough == 'P' and peak_or_trough == 'T' and prev_peak_or_trough == 'P': 
-        print("\nEvaluating SELL conditions...")
+        logs.append("\nEvaluating SELL conditions...")
         
         retracement_percent = entry_wave_length / wave_length
-        print(f"Retracement: {retracement_percent:.2f}")
+        logs.append(f"Retracement: {retracement_percent:.2f}")
         
         if retracement_percent > (fibo_level_from - zone_thickness) and retracement_percent < (fibo_level_to + zone_thickness): 
-            print("Retracement within Fibonacci zone")
+            logs.append("Retracement within Fibonacci zone")
             
             tp_price = price_point - (tp_level * wave_length) 
             sl_price = prev_price_point + (wave_length * 0.2)
@@ -111,11 +114,11 @@ def strategy(df_data, params):
             # if row['Close'] < sl_price and row['Close'] > tp_price: 
             # Variation - Close needs to be between the SL and the previous peak
             if row['Close'] < sl_price and row['Close'] > price_point: 
-                print("All SELL conditions met")
+                logs.append("All SELL conditions met")
                 df_data.at[df_data.index[-1], 'Signal'] = -1
                 signal = -1
             else:
-                print(f"SELL aborted: Close price not between SL ({sl_price:.2f}) and previous trough ({price_point:.2f})")
+                logs.append(f"SELL aborted: Close price not between SL ({sl_price:.2f}) and previous trough ({price_point:.2f})")
 
     trade_params = {
         "tp": round(float(tp_price), 2),
@@ -128,11 +131,11 @@ def strategy(df_data, params):
         ]
     }
 
-    print("\nStrategy analysis complete")
-    print(f"Signal: {signal}")
-    print(f"Parameters: {json.dumps(trade_params, indent=2)}")
+    logs.append("\nStrategy analysis complete")
+    logs.append(f"Signal: {signal}")
+    logs.append(f"Parameters: {json.dumps(trade_params, indent=2)}")
 
-    return signal, trade_params
+    return signal, trade_params, logs
                     # For debugging
                     # [
                     #     {'datetime': date_last_p_or_t, 'price_point': entry_price_point}, 
