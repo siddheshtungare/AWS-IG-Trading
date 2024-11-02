@@ -1,7 +1,0 @@
-python-dotenv
-pandas
-numpy
-scipy
-boto3
-requests
-pytz

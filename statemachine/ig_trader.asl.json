@@ -4,7 +4,7 @@
   "States": {
     "Ig-Login": {
       "Type": "Task",
-      "Resource": "arn:aws:lambda:us-east-1:985148696141:function:IG-Trading-1-IgLoginFunction-IlrAmfllbRIo",
+      "Resource": "${IgLoginFunctionArn}",
       "Retry": [
         {
           "ErrorEquals": ["States.TaskFailed"],
@@ -44,7 +44,7 @@
             "OutputPath": "$.Payload",
             "Parameters": {
               "Payload.$": "$",
-              "FunctionName": "arn:aws:lambda:us-east-1:985148696141:function:IG-Trading-1-IgRunStrategyFunction-0YMdFjqU6vBb:$LATEST"
+              "FunctionName": "${IgRunStrategyFunctionArn}"
             },
             "Retry": [
               {
@@ -96,7 +96,7 @@
             "Resource": "arn:aws:states:::lambda:invoke",
             "Parameters": {
               "Payload.$": "$",
-              "FunctionName": "arn:aws:lambda:us-east-1:985148696141:function:IG-Trading-1-IgProcessBuySellFunction-QGe0VIAJcqXn:$LATEST"
+              "FunctionName": "${IgProcessBuySellFunctionArn}"
             },
             "Retry": [
               {

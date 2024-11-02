@@ -83,7 +83,23 @@ def merge_price_data(df_prices_hist, df_prices_new):
     logs.append("\nFinal merged dataset:")
     logs.append(f"Total records: {df_prices.shape[0]}")
     logs.append("Last 3 records:")
-    logs.append(str(df_prices.tail(3)))
+    
+    # Format the last 3 records in a more readable way
+    last_3_records = df_prices.tail(3)
+    formatted_output = [
+        "\n─────────────────────────────────────────────────────────────────",
+        f"{'Date':^25} │ {'Open':>8} │ {'High':>8} │ {'Low':>8} │ {'Close':>8} │ {'Volume':>8}",
+        "─────────────────────────────────────────────────────────────────"
+    ]
+    
+    for idx, row in last_3_records.iterrows():
+        date_str = idx.strftime('%Y-%m-%d %H:%M:%S')
+        formatted_output.append(
+            f"{date_str:25} │ {row['Open']:8.1f} │ {row['High']:8.1f} │ {row['Low']:8.1f} │ {row['Close']:8.1f} │ {int(row['Volume']):8d}"
+        )
+    
+    formatted_output.append("─────────────────────────────────────────────────────────────────")
+    logs.extend(formatted_output)
     
     return df_prices, logs
 
@@ -153,6 +169,20 @@ def create_df_from_prices_dict(prices):
     
     logs.append(f"Created DataFrame with {len(df_prices)} rows")
     logs.append("Sample of data:")
-    logs.append(str(df_prices.tail(2)))
+    last_2_records = df_prices.tail(2)
+    formatted_output = [
+        "\n─────────────────────────────────────────────────────────────────",
+        f"{'Date':^25} │ {'Open':>8} │ {'High':>8} │ {'Low':>8} │ {'Close':>8} │ {'Volume':>8}",
+        "─────────────────────────────────────────────────────────────────"
+    ]
+    
+    for idx, row in last_2_records.iterrows():
+        date_str = idx.strftime('%Y-%m-%d %H:%M:%S')
+        formatted_output.append(
+            f"{date_str:25} │ {row['Open']:8.1f} │ {row['High']:8.1f} │ {row['Low']:8.1f} │ {row['Close']:8.1f} │ {int(row['Volume']):8d}"
+        )
+    
+    formatted_output.append("─────────────────────────────────────────────────────────────────")
+    logs.extend(formatted_output)
     
     return df_prices, logs

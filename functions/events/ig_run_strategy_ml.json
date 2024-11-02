@@ -1,0 +1,14 @@
+{
+    "config": {
+        "name": "ASX",
+        "MarketId": "IX.D.ASX.IFT.IP",
+        "strategy": "ml-strategy",
+        "strategy_params": {
+            "stop_loss_pct": 0.5,
+            "take_profit_pct": 1.0,
+            "confidence_threshold": 0.6,
+            "position_size": 1,
+            "sagemaker_endpoint": "trading-model-endpoint"
+        }
+    }
+}

@@ -1,7 +1,9 @@
-requests
-pandas
-numpy
-scipy
-pytz
-boto3
 PyYAML
+requests
+boto3
+python-dateutil
+pytz
+tzdata
+numpy
+pandas
+scipy

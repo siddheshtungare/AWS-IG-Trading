@@ -90,7 +90,7 @@ def lambda_handler(event, context):
         request_header, response_body, login_logs = login()
         logs.extend(login_logs)
 
-        df_prices_new, new_logs = get_price_data(symbol_market_id, num_points=2)
+        df_prices_new, new_logs = get_price_data(symbol_market_id, num_points=50)
         logs.extend(new_logs)
 
         # Check market status
@@ -144,33 +144,49 @@ def lambda_handler(event, context):
                 "message": f"{strategy_name} Strategy outcome: {message}",
             })
 
-        return {
+        # Convert timestamps to strings in the response
+        def convert_timestamps(obj):
+            if isinstance(obj, pd.Timestamp):
+                return obj.strftime('%Y-%m-%d %H:%M:%S')
+            elif isinstance(obj, dict):
+                return {k: convert_timestamps(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_timestamps(item) for item in obj]
+            return obj
+
+        # Prepare response with converted timestamps
+        response = {
             'symbol': symbol_name,
             'strategy': strategy_name,
             'config': config,
             'signal': signal,
-            'trade_params': params,
+            'trade_params': convert_timestamps(params),
             'market_closed': gv_market_closed,
             'errors_exist': gv_errors_exist,
-            'messages': gv_bapiret_tab,
+            'messages': convert_timestamps(gv_bapiret_tab),
             'logs': logs
         }
+
+        return response
 
     except Exception as e:
         logs.append(f"Critical error: {str(e)}")
         logs.append(f"Traceback: {traceback.format_exc()}")
         
-        return {
+        # Convert timestamps in error response as well
+        error_response = {
             'statusCode': 500,
             'error': str(e),
             'traceback': traceback.format_exc(),
             'messages': [{
                 "message_type": 'E',
                 "message_source": "IgRunStrategyFunction",
-                "message_at": dt.datetime.now(tz=pytz.timezone('Australia/Sydney')).strftime(format='%Y-%m-%dT%H:%M:%S.%f'),
+                "message_at": dt.datetime.now(tz=pytz.timezone('Australia/Sydney')).strftime('%Y-%m-%d %H:%M:%S'),
                 "message": f"Critical error: {str(e)}"
             }],
             'logs': logs
         }
+        
+        return error_response
 
 

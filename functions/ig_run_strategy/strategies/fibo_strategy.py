@@ -69,6 +69,8 @@ def strategy(df_data, params):
 
     # Evaluate Buy conditions 
     # 1. The retracement as a Trough needs to be confirmed 
+    # These conditions can fail if the values are T-P-P or T-T-P
+        # This indicates a failure in the function fix_consequtive_peaks_troughs
     if entry_peak_or_trough == 'T' and peak_or_trough == 'P' and prev_peak_or_trough == 'T': 
 
     # 2. The last retracement needs to be within the 0.48 to 0.52 area of the prev retracement - Replaced by config - zone_thickness
@@ -97,6 +99,8 @@ def strategy(df_data, params):
 
     # Evaluate Sell conditions 
     # 1. The retracement as a Peak needs to be confirmed 
+    # These conditions can fail if the values are P-T-T or P-P-P
+        # This indicates a failure in the function fix_consequtive_peaks_troughs
     if entry_peak_or_trough == 'P' and peak_or_trough == 'T' and prev_peak_or_trough == 'P': 
         logs.append("\nEvaluating SELL conditions...")
         
