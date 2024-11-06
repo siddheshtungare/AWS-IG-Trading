@@ -33,21 +33,10 @@ AWS-IG-TRADING/
 │ │ ├── ig_api_helper.py
 │ │ ├── requirements.txt
 │ │ ├── strategies/
-│ │ │ ├── **init**.py
 │ │ │ ├── fibo_strategy.py
 │ │ │ ├── ml_strategy.py
 │ │ │ └── sma_strategy.py
 │ │ └── util_funcs.py
-│ └── sagemaker_endpoint/
-│ ├── **init**.py
-│ ├── inference.py
-│ ├── requirements.txt
-│ └── model/
-│ ├── **init**.py
-│ ├── requirements.txt
-│ └── code/
-│ ├── **init**.py
-│ └── inference.py
 ├── Images/
 ├── layers/
 ├── scripts/

@@ -1,11 +1,9 @@
 {
+    "request_headers": {},
+    "account_balance": {},
     "config": {
-        "name": "ASX",
-        "MarketId": "IX.D.ASX.IFT.IP",
-        "strategy": "sma-cross",
-        "strategy_params": {
-            "sma_fast": 20,
-            "sma_slow": 200
-        }
+        "name": "DAX",
+        "MarketId": "IX.D.DAX.IFA.IP",
+        "strategy": "sma-cross"
     }
 }
